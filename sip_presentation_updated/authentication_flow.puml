@@ -1,0 +1,116 @@
+@startuml
+!define LIGHTBLUE
+!includeurl https://raw.githubusercontent.com/Drakemor/RedDress-PlantUML/master/style.puml
+
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title SIP Authentication Flow
+
+participant "User Agent Client\n(Caller)" as UAC
+participant "SIP Proxy" as Proxy
+participant "User Agent Server\n(Callee)" as UAS
+
+note over UAC, UAS: Initial Call Attempt
+
+UAC -> Proxy: INVITE sip:bob@domain.com
+note right of UAC
+  INVITE sip:bob@domain.com SIP/2.0
+  Via: SIP/2.0/UDP client.atlanta.com:5060;branch=z9hG4bK74bf9
+  Max-Forwards: 70
+  From: Alice <sip:alice@atlanta.com>;tag=9fxced76sl
+  To: Bob <sip:bob@domain.com>
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 1 INVITE
+  Contact: <sip:alice@client.atlanta.com>
+  Content-Type: application/sdp
+  Content-Length: 142
+endnote
+
+Proxy --> UAC: 407 Proxy Authentication Required
+note right of Proxy
+  SIP/2.0 407 Proxy Authentication Required
+  Via: SIP/2.0/UDP client.atlanta.com:5060;branch=z9hG4bK74bf9
+  From: Alice <sip:alice@atlanta.com>;tag=9fxced76sl
+  To: Bob <sip:bob@domain.com>;tag=3123551
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 1 INVITE
+  Proxy-Authenticate: Digest realm="domain.com",\n  nonce="f84f1cec41e6cbe5aea9c8e88d359",\n  algorithm=MD5, qop="auth"
+  Content-Length: 0
+endnote
+
+note over UAC, Proxy: Authentication Response
+
+UAC -> Proxy: INVITE sip:bob@domain.com
+note right of UAC
+  INVITE sip:bob@domain.com SIP/2.0
+  Via: SIP/2.0/UDP client.atlanta.com:5060;branch=z9hG4bK74bf9
+  Max-Forwards: 70
+  From: Alice <sip:alice@atlanta.com>;tag=9fxced76sl
+  To: Bob <sip:bob@domain.com>
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 2 INVITE
+  Contact: <sip:alice@client.atlanta.com>
+  Proxy-Authorization: Digest username="alice",\n  realm="domain.com",\n  nonce="f84f1cec41e6cbe5aea9c8e88d359",\n  uri="sip:bob@domain.com",\n  response="ab537186fd425ab54ddb5c5e7833a4d9",\n  algorithm=MD5, qop=auth, nc=00000001, cnonce="0a4f113b"
+  Content-Type: application/sdp
+  Content-Length: 142
+endnote
+
+Proxy --> UAC: 100 Trying
+note right of Proxy
+  Indicates request is being processed
+  No guarantee of delivery to final destination
+endnote
+
+note over Proxy, UAS: Call Forwarding After Authentication
+
+Proxy -> UAS: INVITE sip:bob@domain.com
+note right of Proxy
+  INVITE sip:bob@domain.com SIP/2.0
+  Via: SIP/2.0/UDP proxy.domain.com:5060;branch=z9hG4bK7a83kd
+  Via: SIP/2.0/UDP client.atlanta.com:5060;branch=z9hG4bK74bf9
+  Max-Forwards: 69
+  From: Alice <sip:alice@atlanta.com>;tag=9fxced76sl
+  To: Bob <sip:bob@domain.com>
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 2 INVITE
+  Contact: <sip:alice@client.atlanta.com>
+  Content-Type: application/sdp
+  Content-Length: 142
+endnote
+
+UAS --> Proxy: 180 Ringing
+note right of UAS
+  Phone is ringing
+  User has not answered yet
+endnote
+
+Proxy --> UAC: 180 Ringing
+note right of Proxy
+  Ringing response forwarded to caller
+  Caller typically plays ringback tone
+endnote
+
+UAS --> Proxy: 200 OK
+note right of UAS
+  User has answered
+  Includes SDP with media capabilities
+endnote
+
+Proxy --> UAC: 200 OK
+note right of Proxy
+  Final response forwarded to caller
+  Session is established
+endnote
+
+UAC -> Proxy: ACK sip:bob@domain.com
+note right of UAC
+  Acknowledges receipt of final response
+  Completes three-way handshake
+endnote
+
+Proxy -> UAS: ACK sip:bob@domain.com
+
+note over UAC, UAS #LightBlue: Authenticated Session Established\nRTP Media Session (Audio/Video)
+
+@enduml

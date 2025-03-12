@@ -1,0 +1,95 @@
+@startuml
+!define LIGHTBLUE
+!includeurl https://raw.githubusercontent.com/Drakemor/RedDress-PlantUML/master/style.puml
+
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title SIP Basic Call Flow
+
+participant "User Agent Client\n(Caller)" as UAC
+participant "SIP Proxy" as Proxy
+participant "User Agent Server\n(Callee)" as UAS
+
+note over UAC, UAS: Session Establishment
+
+UAC -> Proxy: INVITE sip:bob@domain.com
+note right of UAC
+  INVITE includes SDP with media capabilities
+  Via: SIP/2.0/UDP client.atlanta.com
+  From: Alice <sip:alice@atlanta.com>
+  To: Bob <sip:bob@domain.com>
+  Call-ID: a84b4c76e66710@client.atlanta.com
+  CSeq: 314159 INVITE
+  Content-Type: application/sdp
+endnote
+
+Proxy --> UAC: 100 Trying
+note right of Proxy
+  Indicates request is being processed
+  No guarantee of delivery to final destination
+endnote
+
+Proxy -> UAS: INVITE sip:bob@domain.com
+note right of Proxy
+  Proxy adds Via header
+  Via: SIP/2.0/UDP proxy.domain.com
+  Via: SIP/2.0/UDP client.atlanta.com
+endnote
+
+UAS --> Proxy: 180 Ringing
+note right of UAS
+  Phone is ringing
+  User has not answered yet
+endnote
+
+Proxy --> UAC: 180 Ringing
+note right of Proxy
+  Ringing response forwarded to caller
+  Caller typically plays ringback tone
+endnote
+
+UAS --> Proxy: 200 OK
+note right of UAS
+  User has answered
+  Includes SDP with media capabilities
+  Contact: <sip:bob@client.biloxi.com>
+endnote
+
+Proxy --> UAC: 200 OK
+note right of Proxy
+  Final response forwarded to caller
+  Session is established
+endnote
+
+UAC -> Proxy: ACK sip:bob@domain.com
+note right of UAC
+  Acknowledges receipt of final response
+  Completes three-way handshake
+endnote
+
+Proxy -> UAS: ACK sip:bob@domain.com
+
+note over UAC, UAS #LightBlue: RTP Media Session (Audio/Video)
+
+note over UAC, UAS: Session Termination
+
+UAC -> Proxy: BYE sip:bob@domain.com
+note right of UAC
+  Terminates the session
+  CSeq: 314160 BYE
+endnote
+
+Proxy -> UAS: BYE sip:bob@domain.com
+
+UAS --> Proxy: 200 OK
+note right of UAS
+  Acknowledges session termination
+endnote
+
+Proxy --> UAC: 200 OK
+note right of Proxy
+  Session terminated successfully
+endnote
+
+@enduml

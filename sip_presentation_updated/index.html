@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Initiation Protocol (SIP) and SIPp Testing Tool</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Session Initiation Protocol (SIP) and SIPp Testing Tool</h1>
+        <p class="subtitle">A Comprehensive Guide for VoIP Engineers</p>
+        <p class="presenter">Presented by: Hari Korivi</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#sip-overview">SIP Overview</a></li>
+            <li><a href="#sip-messages">SIP Messages</a></li>
+            <li><a href="#call-flows">Call Flows</a></li>
+            <li><a href="#sipp-tool">SIPp Tool</a></li>
+            <li><a href="#demonstrations">Demonstrations</a></li>
+            <li><a href="#advanced-topics">Advanced Topics</a></li>
+            <li><a href="#references">References</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="introduction">
+            <h2>Introduction</h2>
+            <div class="content-wrapper">
+                <div class="text-content">
+                    <p>The Session Initiation Protocol (SIP) is a signaling protocol used for initiating, maintaining, and terminating real-time sessions that include voice, video, and messaging applications. SIP is an application layer protocol designed to be independent of the underlying transport layer; it can run on TCP, UDP, or SCTP.</p>
+                    
+                    <p>This presentation provides a comprehensive overview of SIP as defined in RFC 3261 and related RFCs, along with detailed information about SIPp, a powerful open-source testing tool for SIP protocol implementations.</p>
+                    
+                    <h3>Presentation Objectives</h3>
+                    <ul>
+                        <li>Understand SIP fundamentals and message structure</li>
+                        <li>Explore common SIP call flows and scenarios</li>
+                        <li>Learn how to use SIPp for testing SIP implementations</li>
+                        <li>Examine advanced SIP topics and best practices</li>
+                    </ul>
+                </div>
+                <div class="image-content">
+                    <img src="images/basic_call_flow.png" alt="SIP Basic Call Flow" width="400">
+                </div>
+            </div>
+        </section>
+
+        <section id="sip-overview">
+            <h2>SIP Overview</h2>
+            
+            <h3>What is SIP?</h3>
+            <p>Session Initiation Protocol (SIP) is an IETF-defined signaling protocol widely used for controlling multimedia communication sessions such as voice and video calls over Internet Protocol (IP). The protocol can be used for creating, modifying, and terminating two-party (unicast) or multiparty (multicast) sessions.</p>
+            
+            <h3>Key Features of SIP</h3>
+            <ul>
+                <li><strong>Text-based:</strong> Human-readable format similar to HTTP</li>
+                <li><strong>Extensible:</strong> Can be extended with additional headers and methods</li>
+                <li><strong>Independent:</strong> Separates signaling from session description</li>
+                <li><strong>Modular:</strong> Works with various other protocols (SDP, RTP, RTCP)</li>
+                <li><strong>Scalable:</strong> Supports various deployment architectures</li>
+            </ul>
+            
+            <h3>SIP Network Elements</h3>
+            <div class="content-wrapper">
+                <div class="text-content">
+                    <ul>
+                        <li><strong>User Agent Client (UAC):</strong> Initiates SIP requests</li>
+                        <li><strong>User Agent Server (UAS):</strong> Responds to SIP requests</li>
+                        <li><strong>Proxy Server:</strong> Routes requests to user's current location</li>
+                        <li><strong>Registrar:</strong> Accepts REGISTER requests for user location</li>
+                        <li><strong>Redirect Server:</strong> Redirects clients to alternate URIs</li>
+                        <li><strong>Back-to-Back User Agent (B2BUA):</strong> Acts as both UAC and UAS</li>
+                    </ul>
+                </div>
+                <div class="image-content">
+                    <img src="images/registration_flow.png" alt="SIP Registration Flow" width="400">
+                </div>
+            </div>
+            
+            <h3>SIP Addressing</h3>
+            <p>SIP uses URIs (Uniform Resource Identifiers) to identify users, following the format:</p>
+            <pre><code>sip:username@domain:port;uri-parameters?headers</code></pre>
+            <p>Examples:</p>
+            <pre><code>sip:alice@atlanta.com
+sip:bob@biloxi.com:5060
+sip:carol@chicago.com;transport=tcp
+sips:dave@secure.example.com</code></pre>
+        </section>
+
+        <section id="sip-messages">
+            <h2>SIP Messages</h2>
+            
+            <h3>SIP Request Methods</h3>
+            <ul>
+                <li><strong>INVITE:</strong> Initiates a session</li>
+                <li><strong>ACK:</strong> Confirms receipt of final response to INVITE</li>
+                <li><strong>BYE:</strong> Terminates a session</li>
+                <li><strong>CANCEL:</strong> Cancels a pending request</li>
+                <li><strong>REGISTER:</strong> Registers contact information</li>
+                <li><strong>OPTIONS:</strong> Queries capabilities</li>
+                <li><strong>REFER:</strong> Asks recipient to issue request (call transfer)</li>
+                <li><strong>SUBSCRIBE:</strong> Requests notification of an event</li>
+                <li><strong>NOTIFY:</strong> Provides information about an event</li>
+                <li><strong>UPDATE:</strong> Modifies session state</li>
+                <li><strong>INFO:</strong> Sends mid-session information</li>
+                <li><strong>MESSAGE:</strong> Transports instant messages</li>
+            </ul>
+            
+            <h3>SIP Response Codes</h3>
+            <ul>
+                <li><strong>1xx (Provisional):</strong> Request received, processing continues</li>
+                <li><strong>2xx (Success):</strong> Action successfully received, understood, accepted</li>
+                <li><strong>3xx (Redirection):</strong> Further action needed to complete request</li>
+                <li><strong>4xx (Client Error):</strong> Request contains bad syntax or cannot be fulfilled</li>
+                <li><strong>5xx (Server Error):</strong> Server failed to fulfill an apparently valid request</li>
+                <li><strong>6xx (Global Failure):</strong> Request cannot be fulfilled at any server</li>
+            </ul>
+            
+            <h3>SIP Message Structure</h3>
+            <div class="content-wrapper">
+                <div class="text-content">
+                    <p>SIP messages consist of a start-line, one or more header fields, an empty line indicating the end of the header fields, and an optional message body.</p>
+                    
+                    <h4>Example INVITE Request:</h4>
+                    <pre><code>INVITE sip:bob@biloxi.com SIP/2.0
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bK776asdhds
+Max-Forwards: 70
+To: Bob &lt;sip:bob@biloxi.com&gt;
+From: Alice &lt;sip:alice@atlanta.com&gt;;tag=1928301774
+Call-ID: a84b4c76e66710@pc33.atlanta.com
+CSeq: 314159 INVITE
+Contact: &lt;sip:alice@pc33.atlanta.com&gt;
+Content-Type: application/sdp
+Content-Length: 142
+
+v=0
+o=alice 2890844526 2890844526 IN IP4 pc33.atlanta.com
+s=Session SDP
+c=IN IP4 pc33.atlanta.com
+t=0 0
+m=audio 49172 RTP/AVP 0
+a=rtpmap:0 PCMU/8000</code></pre>
+                </div>
+                <div class="image-content">
+                    <img src="images/authentication_flow.png" alt="SIP Authentication Flow" width="400">
+                </div>
+            </div>
+            
+            <h3>Common SIP Headers</h3>
+            <ul>
+                <li><strong>Via:</strong> Indicates the transport used for the transaction and identifies the location where the response should be sent</li>
+                <li><strong>From:</strong> Indicates the initiator of the request</li>
+                <li><strong>To:</strong> Indicates the logical recipient of the request</li>
+                <li><strong>Call-ID:</strong> Uniquely identifies a specific invitation or all registrations of a particular client</li>
+                <li><strong>CSeq:</strong> Contains a sequence number and request method</li>
+                <li><strong>Contact:</strong> Provides a URI that can be used to directly contact the user agent</li>
+                <li><strong>Content-Type:</strong> Indicates the media type of the message body</li>
+                <li><strong>Content-Length:</strong> Indicates the size of the message body in bytes</li>
+            </ul>
+        </section>
+
+        <section id="call-flows">
+            <h2>SIP Call Flows</h2>
+            
+            <h3>Basic Call Flow</h3>
+            <div class="content-wrapper">
+                <div class="text-content">
+                    <p>The basic SIP call flow involves three main phases:</p>
+                    <ol>
+                        <li><strong>Session Establishment:</strong> INVITE, 100 Trying, 180 Ringing, 200 OK, ACK</li>
+                        <li><strong>Media Exchange:</strong> RTP/RTCP packets for audio/video</li>
+                        <li><strong>Session Termination:</strong> BYE, 200 OK</li>
+                    </ol>
+                    <p>The diagram shows a typical call flow between two SIP endpoints through a proxy server. The INVITE request contains an SDP offer with media capabilities, and the 200 OK response contains an SDP answer. The ACK request completes the three-way handshake for reliable message exchange.</p>
+                </div>
+                <div class="image-content call-flow-diagram">
+                    <img src="images/basic_call_flow.png" alt="SIP Basic Call Flow" width="500">
+                </div>
+            </div>
+            
+            <h3>Registration Flow</h3>
+            <div class="content-wrapper">
+                <div class="text-content">
+                    <p>Registration is the process by which a user agent informs a SIP registrar of its current location. This allows incoming calls to be routed correctly.</p>
+                    <p>The registration process typically involves:</p>
+                    <ol>
+                        <li>Initial REGISTER request from the user agent</li>
+                        <li>401 Unauthorized response with authentication challenge</li>
+                        <li>Second REGISTER request with authentication credentials</li>
+                        <li>200 OK response confirming successful registration</li>
+                    </ol>
+                    <p>Registrations are temporary and must be refreshed periodically. The Expires header indicates how long the registration is valid.</p>
+                </div>
+                <div class="image-content call-flow-diagram">
+                    <img src="images/registration_flow.png" alt="SIP Registration Flow" width="500">
+                </div>
+            </div>
+            
+            <h3>Authentication Flow</h3>
+            <div class="content-wrapper">
+                <div class="text-content">
+                    <p>SIP supports several authentication mechanisms, with digest authentication being the most common. The authentication flow typically involves:</p>
+                    <ol>
+                        <li>Initial request (e.g., INVITE, REGISTER)</li>
+                        <li>Challenge response (401 Unauthorized or 407 Proxy Authentication Required)</li>
+                        <li>Authenticated request with credentials</li>
+                        <li>Successful response (200 OK)</li>
+                    </ol>
+                    <p>The WWW-Authenticate or Proxy-Authenticate header in the challenge contains the realm, nonce, and algorithm parameters. The client responds with an Authorization or Proxy-Authorization header containing the calculated response value.</p>
+                </div>
+                <div class="image-content call-flow-diagram">
+                    <img src="images/authentication_flow.png" alt="SIP Authentication Flow" width="500">
+                </div>
+            </div>
+            
+            <h3>Call Transfer Flow</h3>
+            <div class="content-wrapper">
+                <div class="text-content">
+                    <p>SIP supports call transfer using the REFER method. In a typical scenario:</p>
+                    <ol>
+                        <li>Alice and Bob are in an established call</li>
+                        <li>Alice wants to transfer Bob to Charlie</li>
+                        <li>Alice sends a REFER request to Bob with Refer-To: Charlie</li>
+                        <li>Bob acknowledges with 202 Accepted</li>
+                        <li>Bob sends NOTIFY messages to Alice about transfer progress</li>
+                        <li>Bob initiates a new call to Charlie</li>
+                        <li>Once Bob and Charlie are connected, Alice and Bob terminate their call</li>
+                    </ol>
+                    <p>The REFER method creates a subscription that is terminated when the transfer is complete or fails.</p>
+                </div>
+                <div class="image-content call-flow-diagram">
+                    <img src="images/call_transfer_flow.png" alt="SIP Call Transfer Flow" width="500">
+                </div>
+            </div>
+        </section>
+
+        <section id="sipp-tool">
+            <h2>SIPp Testing Tool</h2>
+            
+            <h3>What is SIPp?</h3>
+            <p>SIPp is a free open source test tool and traffic generator for the SIP protocol. It includes built-in scenario capabilities, dynamic call rate adjustments with periodic CSV statistics, and can be used to test various SIP equipment including SIP proxies, B2BUAs, SIP media servers, SIP/x gateways, and SIP PBXs.</p>
+            
+            <h3>Key Features</h3>
+            <ul>
+                <li>Dynamic call rate adjustments</li>
+                <li>Built-in customizable scenarios</li>
+                <li>Statistics reporting in CSV format</li>
+                <li>RTP echo and RTP/PCAP replay capabilities</li>
+                <li>Support for IPv6, TLS, SCTP, SIP authentication, and UDP retransmissions</li>
+                <li>Call specific variable management</li>
+                <li>Conditional branching in scenarios</li>
+                <li>Multi-socket support</li>
+            </ul>
+            
+            <h3>SIPp Architecture</h3>
+            <div class="content-wrapper">
+                <div class="text-content">
+                    <p>SIPp uses XML-based scenario files to define test cases. These scenarios describe the sequence of SIP messages to be sent and the expected responses. SIPp can act as a User Agent Client (UAC), User Agent Server (UAS), or both simultaneously.</p>
+                    
+                    <p>The main components of SIPp include:</p>
+                    <ul>
+                        <li><strong>Scenario Parser:</strong> Reads and interprets XML scenario files</li>
+                        <li><strong>Call Manager:</strong> Handles call creation, management, and termination</li>
+                        <li><strong>Statistics Engine:</strong> Collects and reports performance metrics</li>
+                        <li><strong>Media Manager:</strong> Handles RTP media if enabled</li>
+                    </ul>
+                </div>
+                <div class="image-content">
+                    <img src="images/sipp_test_flow.png" alt="SIPp Test Flow" width="400">
+                </div>
+            </div>
+            
+            <h3>XML Scenario Structure</h3>
+            <pre><code>&lt;?xml version="1.0" encoding="ISO-8859-1" ?&gt;
+&lt;!DOCTYPE scenario SYSTEM "sipp.dtd"&gt;
+&lt;scenario name="Basic UAC Scenario"&gt;
+  &lt;send retrans="500"&gt;
+    &lt;![CDATA[
+      INVITE sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      From: sipp &lt;sip:sipp@[local_ip]:[local_port]&gt;;tag=[call_number]
+      To: [service] &lt;sip:[service]@[remote_ip]:[remote_port]&gt;
+      Call-ID: [call_id]
+      CSeq: 1 INVITE
+      Contact: sip:sipp@[local_ip]:[local_port]
+      Max-Forwards: 70
+      Content-Type: application/sdp
+      Content-Length: [len]
+
+      v=0
+      o=user1 53655765 2353687637 IN IP[local_ip_type] [local_ip]
+      s=-
+      c=IN IP[media_ip_type] [media_ip]
+      t=0 0
+      m=audio [media_port] RTP/AVP 0
+      a=rtpmap:0 PCMU/8000
+    ]]&gt;
+  &lt;/send&gt;
+
+  &lt;recv response="100" optional="true"&gt;&lt;/recv&gt;
+  &lt;recv response="180" optional="true"&gt;&lt;/recv&gt;
+  &lt;recv response="200" rtd="true"&gt;&lt;/recv&gt;
+
+  &lt;send&gt;
+    &lt;![CDATA[
+      ACK sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      From: sipp &lt;sip:sipp@[local_ip]:[local_port]&gt;;tag=[call_number]
+      To: [service] &lt;sip:[service]@[remote_ip]:[remote_port]&gt;[peer_tag_param]
+      Call-ID: [call_id]
+      CSeq: 1 ACK
+      Contact: sip:sipp@[local_ip]:[local_port]
+      Max-Forwards: 70
+      Content-Length: 0
+    ]]&gt;
+  &lt;/send&gt;
+
+  &lt;pause milliseconds="3000"/&gt;
+
+  &lt;send retrans="500"&gt;
+    &lt;![CDATA[
+      BYE sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      From: sipp &lt;sip:sipp@[local_ip]:[local_port]&gt;;tag=[call_number]
+      To: [service] &lt;sip:[service]@[remote_ip]:[remote_port]&gt;[peer_tag_param]
+      Call-ID: [call_id]
+      CSeq: 2 BYE
+      Contact: sip:sipp@[local_ip]:[local_port]
+      Max-Forwards: 70
+      Content-Length: 0
+    ]]&gt;
+  &lt;/send&gt;
+
+  &lt;recv response="200" crlf="true"&gt;&lt;/recv&gt;
+&lt;/scenario&gt;</code></pre>
+        </section>
+
+        <section id="demonstrations">
+            <h2>SIPp Demonstrations</h2>
+            
+            <h3>Basic UAC Test</h3>
+            <p>This demonstration shows how to use SIPp to test a SIP server by generating calls as a User Agent Client (UAC).</p>
+            
+            <h4>Command Line:</h4>
+            <pre><code>sipp -sf uac_scenario.xml 192.168.1.10:5060 -s 1000 -l 10 -m 100 -r 10 -trace_msg</code></pre>
+            
+            <h4>Parameters Explained:</h4>
+            <ul>
+                <li><strong>-sf uac_scenario.xml:</strong> Scenario file to use</li>
+                <li><strong>192.168.1.10:5060:</strong> Target SIP server address and port</li>
+                <li><strong>-s 1000:</strong> Service to call (used in To header)</li>
+                <li><strong>-l 10:</strong> Maximum simultaneous calls</li>
+                <li><strong>-m 100:</strong> Stop after 100 calls</li>
+                <li><strong>-r 10:</strong> Call rate (calls per second)</li>
+                <li><strong>-trace_msg:</strong> Trace all sent and received messages</li>
+            </ul>
+            
+            <h3>UAS Test</h3>
+            <p>This demonstration shows how to use SIPp as a User Agent Server (UAS) to receive and respond to SIP requests.</p>
+            
+            <h4>Command Line:</h4>
+            <pre><code>sipp -sf uas_scenario.xml -p 5060 -mi 192.168.1.5 -trace_msg</code></pre>
+            
+            <h4>Parameters Explained:</h4>
+            <ul>
+                <li><strong>-sf uas_scenario.xml:</strong> UAS scenario file</li>
+                <li><strong>-p 5060:</strong> Local port to listen on</li>
+                <li><strong>-mi 192.168.1.5:</strong> Local IP address</li>
+                <li><strong>-trace_msg:</strong> Trace all sent and received messages</li>
+            </ul>
+            
+            <h3>Performance Testing</h3>
+            <p>This demonstration shows how to use SIPp for performance testing of a SIP server.</p>
+            
+            <h4>Command Line:</h4>
+            <pre><code>sipp -sf uac_scenario.xml 192.168.1.10:5060 -l 1000 -m 10000 -r 100 -rp 1000 -trace_stat -stf stats.csv -fd 10</code></pre>
+            
+            <h4>Parameters Explained:</h4>
+            <ul>
+                <li><strong>-l 1000:</strong> Maximum 1000 simultaneous calls</li>
+                <li><strong>-m 10000:</strong> Stop after 10,000 calls</li>
+                <li><strong>-r 100:</strong> Initial rate of 100 calls per second</li>
+                <li><strong>-rp 1000:</strong> Rate period for statistics (ms)</li>
+                <li><strong>-trace_stat:</strong> Dump statistics to screen</li>
+                <li><strong>-stf stats.csv:</strong> Write statistics to CSV file</li>
+                <li><strong>-fd 10:</strong> Dump statistics every 10 calls</li>
+            </ul>
+            
+            <h3>Media Testing</h3>
+            <p>This demonstration shows how to use SIPp with RTP media capabilities.</p>
+            
+            <h4>Command Line:</h4>
+            <pre><code>sipp -sf uac_pcap.xml 192.168.1.10:5060 -s 1000 -l 5 -m 10 -r 1 -p 5061 -trace_msg -trace_screen -trace_err</code></pre>
+            
+            <h4>Parameters Explained:</h4>
+            <ul>
+                <li><strong>-sf uac_pcap.xml:</strong> Scenario file with PCAP media</li>
+                <li><strong>-p 5061:</strong> Local port to use</li>
+                <li><strong>-trace_screen:</strong> Display sent/received messages on screen</li>
+                <li><strong>-trace_err:</strong> Trace error logs</li>
+            </ul>
+        </section>
+
+        <section id="advanced-topics">
+            <h2>Advanced Topics</h2>
+            
+            <h3>SIP and NAT Traversal</h3>
+            <p>Network Address Translation (NAT) presents challenges for SIP because IP addresses and ports are embedded in SIP messages and SDP bodies. Solutions include:</p>
+            <ul>
+                <li><strong>STUN (Session Traversal Utilities for NAT):</strong> Allows clients to discover their public IP address</li>
+                <li><strong>TURN (Traversal Using Relays around NAT):</strong> Relays media through a server when direct connection is not possible</li>
+                <li><strong>ICE (Interactive Connectivity Establishment):</strong> Framework that uses STUN and TURN to find the optimal media path</li>
+                <li><strong>SIP ALGs (Application Layer Gateways):</strong> Modify SIP messages as they pass through NAT devices</li>
+                <li><strong>Session Border Controllers (SBCs):</strong> Specialized devices that handle NAT traversal and other border functions</li>
+            </ul>
+            
+            <h3>SIP Security</h3>
+            <p>SIP security considerations include:</p>
+            <ul>
+                <li><strong>Authentication:</strong> Digest authentication, TLS client authentication</li>
+                <li><strong>Transport Security:</strong> TLS for signaling (SIPS URIs), SRTP for media</li>
+                <li><strong>Identity and Trust:</strong> STIR/SHAKEN framework for caller ID authentication</li>
+                <li><strong>DoS Protection:</strong> Rate limiting, topology hiding</li>
+                <li><strong>Media Security:</strong> SRTP, ZRTP, DTLS-SRTP</li>
+            </ul>
+            
+            <h3>SIP Interoperability</h3>
+            <p>Ensuring interoperability between different SIP implementations requires:</p>
+            <ul>
+                <li><strong>Conformance Testing:</strong> Verifying compliance with standards</li>
+                <li><strong>Interoperability Testing:</strong> Testing with other vendors' equipment</li>
+                <li><strong>SIPit Events:</strong> Industry interoperability testing events</li>
+                <li><strong>SIP Forum:</strong> Industry association promoting SIP interoperability</li>
+                <li><strong>SIPconnect:</strong> Technical recommendation for SIP trunking interoperability</li>
+            </ul>
+            
+            <h3>Advanced SIPp Features</h3>
+            <div class="content-wrapper">
+                <div class="text-content">
+                    <h4>Conditional Scenarios</h4>
+                    <pre><code>&lt;recv response="200" optional="false" next="5"&gt;
+  &lt;action&gt;
+    &lt;ereg regexp=".*" search_in="hdr" header="Contact:" check_it="true" assign_to="1"/&gt;
+  &lt;/action&gt;
+&lt;/recv&gt;
+
+&lt;label id="5"/&gt;
+&lt;!-- Continue scenario based on condition --&gt;</code></pre>
+                    
+                    <h4>CSV Data Injection</h4>
+                    <pre><code>&lt;!-- Read user credentials from users.csv --&gt;
+&lt;nop&gt;
+  &lt;action&gt;
+    &lt;exec play_pcap_audio="g711a.pcap"/&gt;
+  &lt;/action&gt;
+&lt;/nop&gt;</code></pre>
+                </div>
+                <div class="image-content">
+                    <img src="images/sipp_test_flow.png" alt="Advanced SIPp Test Flow" width="400">
+                </div>
+            </div>
+        </section>
+
+        <section id="references">
+            <h2>References</h2>
+            
+            <h3>SIP RFCs</h3>
+            <ul>
+                <li><a href="https://www.ietf.org/rfc/rfc3261.txt" target="_blank">RFC 3261: SIP: Session Initiation Protocol</a></li>
+                <li><a href="https://www.rfc-editor.org/rfc/rfc3665.html" target="_blank">RFC 3665: SIP Basic Call Flow Examples</a></li>
+                <li>RFC 3262: Reliability of Provisional Responses in SIP</li>
+                <li>RFC 3263: SIP: Locating SIP Servers</li>
+                <li>RFC 3264: An Offer/Answer Model with SDP</li>
+                <li>RFC 3265: SIP-Specific Event Notification</li>
+                <li>RFC 3515: The SIP Refer Method</li>
+                <li>RFC 3891: The SIP "Replaces" Header</li>
+                <li>RFC 4566: SDP: Session Description Protocol</li>
+                <li>RFC 6026: Correct Transaction Handling for 2xx Responses to SIP INVITE Requests</li>
+            </ul>
+            
+            <h3>SIPp Resources</h3>
+            <ul>
+                <li><a href="https://sipp.sourceforge.net/doc/reference.html" target="_blank">SIPp Reference Documentation</a></li>
+                <li><a href="https://github.com/pbertera/SIPp-by-example" target="_blank">SIPp by Example (GitHub)</a></li>
+                <li>SIPp User Manual</li>
+                <li>SIPp Tutorial: Performance Testing SIP Applications</li>
+            </ul>
+            
+            <h3>Books and Articles</h3>
+            <ul>
+                <li>Johnston, A. B. (2009). SIP: Understanding the Session Initiation Protocol (3rd ed.). Artech House.</li>
+                <li>Camarillo, G. (2002). SIP Demystified. McGraw-Hill Professional.</li>
+                <li>Russell, T. (2008). Session Initiation Protocol (SIP): Controlling Convergent Networks. McGraw-Hill Professional.</li>
+                <li>Hilt, V., Camarillo, G., & Rosenberg, J. (2011). Evolution of the Session Initiation Protocol. IEEE Communications Magazine.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>Presentation created by Hari Korivi &copy; 2025</p>
+        <p>Based on RFC 3261 and related SIP specifications</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

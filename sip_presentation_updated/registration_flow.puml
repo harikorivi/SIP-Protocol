@@ -1,0 +1,73 @@
+@startuml
+!define LIGHTBLUE
+!includeurl https://raw.githubusercontent.com/Drakemor/RedDress-PlantUML/master/style.puml
+
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title SIP Registration Flow
+
+participant "User Agent" as UA
+participant "SIP Registrar" as Registrar
+
+note over UA, Registrar: Initial Registration Attempt
+
+UA -> Registrar: REGISTER sip:domain.com
+note right of UA
+  REGISTER sip:domain.com SIP/2.0
+  Via: SIP/2.0/UDP client.atlanta.com:5060;branch=z9hG4bK74bf9
+  Max-Forwards: 70
+  From: Alice <sip:alice@domain.com>;tag=9fxced76sl
+  To: Alice <sip:alice@domain.com>
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 1 REGISTER
+  Contact: <sip:alice@client.atlanta.com:5060;transport=udp>
+  Expires: 3600
+  Content-Length: 0
+endnote
+
+Registrar --> UA: 401 Unauthorized
+note right of Registrar
+  SIP/2.0 401 Unauthorized
+  Via: SIP/2.0/UDP client.atlanta.com:5060;branch=z9hG4bK74bf9
+  From: Alice <sip:alice@domain.com>;tag=9fxced76sl
+  To: Alice <sip:alice@domain.com>;tag=87654321
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 1 REGISTER
+  WWW-Authenticate: Digest realm="domain.com",\n  nonce="84f1e1b9340cc3d8a4f27168d288716f",\n  algorithm=MD5, qop="auth"
+  Content-Length: 0
+endnote
+
+note over UA, Registrar: Authentication Response
+
+UA -> Registrar: REGISTER sip:domain.com
+note right of UA
+  REGISTER sip:domain.com SIP/2.0
+  Via: SIP/2.0/UDP client.atlanta.com:5060;branch=z9hG4bK74bf9
+  Max-Forwards: 70
+  From: Alice <sip:alice@domain.com>;tag=9fxced76sl
+  To: Alice <sip:alice@domain.com>
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 2 REGISTER
+  Contact: <sip:alice@client.atlanta.com:5060;transport=udp>
+  Authorization: Digest username="alice",\n  realm="domain.com",\n  nonce="84f1e1b9340cc3d8a4f27168d288716f",\n  uri="sip:domain.com",\n  response="ca19d124ca84e1352452d4904da95256",\n  algorithm=MD5, qop=auth, nc=00000001, cnonce="8bd76123"
+  Expires: 3600
+  Content-Length: 0
+endnote
+
+Registrar --> UA: 200 OK
+note right of Registrar
+  SIP/2.0 200 OK
+  Via: SIP/2.0/UDP client.atlanta.com:5060;branch=z9hG4bK74bf9
+  From: Alice <sip:alice@domain.com>;tag=9fxced76sl
+  To: Alice <sip:alice@domain.com>;tag=87654321
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 2 REGISTER
+  Contact: <sip:alice@client.atlanta.com:5060;transport=udp>;expires=3600
+  Date: Wed, 12 Mar 2025 11:43:00 GMT
+  Content-Length: 0
+endnote
+
+note over UA, Registrar #LightBlue: Registration Successful - Binding Created\nUser Agent is now reachable at registered contact
+
+@enduml

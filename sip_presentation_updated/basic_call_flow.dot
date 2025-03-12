@@ -1,0 +1,36 @@
+digraph "SIP Basic Call Flow" {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor=lightblue];
+  edge [fontsize=10];
+  
+  // Define nodes
+  UAC [label="User Agent Client\n(Caller)"];
+  Proxy [label="SIP Proxy"];
+  UAS [label="User Agent Server\n(Callee)"];
+  
+  // Define the call flow
+  UAC -> Proxy [label="1. INVITE"];
+  Proxy -> UAC [label="2. 100 Trying"];
+  Proxy -> UAS [label="3. INVITE"];
+  UAS -> Proxy [label="4. 180 Ringing"];
+  Proxy -> UAC [label="5. 180 Ringing"];
+  UAS -> Proxy [label="6. 200 OK"];
+  Proxy -> UAC [label="7. 200 OK"];
+  UAC -> Proxy [label="8. ACK"];
+  Proxy -> UAS [label="9. ACK"];
+  
+  // RTP Media
+  {rank=same; UAC; UAS}
+  UAC -> UAS [style=dashed, label="RTP Media Session", color=red];
+  
+  // Call Termination
+  UAC -> Proxy [label="10. BYE"];
+  Proxy -> UAS [label="11. BYE"];
+  UAS -> Proxy [label="12. 200 OK"];
+  Proxy -> UAC [label="13. 200 OK"];
+  
+  // Add a title
+  label = "SIP Basic Call Flow";
+  labelloc = "t";
+  fontsize = 20;
+}

@@ -1,0 +1,27 @@
+digraph "SIPp Test Scenario Flow" {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor=lightblue];
+  edge [fontsize=10];
+  
+  // Define nodes
+  SIPp [label="SIPp\n(Test Tool)"];
+  SUT [label="System Under Test\n(SIP Server/Proxy)"];
+  
+  // Define the test flow
+  SIPp -> SUT [label="1. INVITE (XML Scenario)"];
+  SUT -> SIPp [label="2. 100 Trying"];
+  SUT -> SIPp [label="3. 180 Ringing"];
+  SUT -> SIPp [label="4. 200 OK"];
+  SIPp -> SUT [label="5. ACK"];
+  
+  {rank=same; SIPp; SUT}
+  SIPp -> SUT [style=dashed, label="RTP Media (optional)", color=red];
+  
+  SIPp -> SUT [label="6. BYE"];
+  SUT -> SIPp [label="7. 200 OK"];
+  
+  // Add a title
+  label = "SIPp Test Scenario Flow";
+  labelloc = "t";
+  fontsize = 20;
+}
