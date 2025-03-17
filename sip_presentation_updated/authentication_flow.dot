@@ -1,0 +1,27 @@
+digraph "SIP Authentication Flow" {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor=lightblue];
+  edge [fontsize=10];
+  
+  // Define nodes
+  UAC [label="User Agent Client"];
+  Proxy [label="SIP Proxy"];
+  UAS [label="User Agent Server"];
+  
+  // Define the authentication flow
+  UAC -> Proxy [label="1. INVITE sip:bob@domain.com"];
+  Proxy -> UAC [label="2. 407 Proxy Authentication Required\nProxy-Authenticate: Digest..."];
+  UAC -> Proxy [label="3. INVITE sip:bob@domain.com\nProxy-Authorization: Digest..."];
+  Proxy -> UAS [label="4. INVITE"];
+  UAS -> Proxy [label="5. 180 Ringing"];
+  Proxy -> UAC [label="6. 180 Ringing"];
+  UAS -> Proxy [label="7. 200 OK"];
+  Proxy -> UAC [label="8. 200 OK"];
+  UAC -> Proxy [label="9. ACK"];
+  Proxy -> UAS [label="10. ACK"];
+  
+  // Add a title
+  label = "SIP Authentication Flow";
+  labelloc = "t";
+  fontsize = 20;
+}

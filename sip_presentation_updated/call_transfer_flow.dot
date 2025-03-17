@@ -1,0 +1,41 @@
+digraph "SIP Call Transfer Flow" {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor=lightblue];
+  edge [fontsize=10];
+  
+  // Define nodes
+  Alice [label="Alice\n(Transferor)"];
+  Bob [label="Bob\n(Transferee)"];
+  Charlie [label="Charlie\n(Transfer Target)"];
+  
+  // Define the call transfer flow
+  Alice -> Bob [label="1. INVITE"];
+  Bob -> Alice [label="2. 200 OK"];
+  Alice -> Bob [label="3. ACK"];
+  
+  {rank=same; Alice; Bob}
+  Alice -> Bob [style=dashed, label="Established Call", color=red];
+  
+  Alice -> Bob [label="4. REFER\nRefer-To: Charlie"];
+  Bob -> Alice [label="5. 202 Accepted"];
+  Bob -> Alice [label="6. NOTIFY (Trying)"];
+  Alice -> Bob [label="7. 200 OK"];
+  
+  Bob -> Charlie [label="8. INVITE"];
+  Charlie -> Bob [label="9. 200 OK"];
+  Bob -> Charlie [label="10. ACK"];
+  
+  {rank=same; Bob; Charlie}
+  Bob -> Charlie [style=dashed, label="New Call Established", color=red];
+  
+  Bob -> Alice [label="11. NOTIFY (OK)"];
+  Alice -> Bob [label="12. 200 OK"];
+  
+  Alice -> Bob [label="13. BYE"];
+  Bob -> Alice [label="14. 200 OK"];
+  
+  // Add a title
+  label = "SIP Call Transfer Flow (REFER Method)";
+  labelloc = "t";
+  fontsize = 20;
+}

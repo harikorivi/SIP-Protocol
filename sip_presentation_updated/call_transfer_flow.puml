@@ -1,0 +1,148 @@
+@startuml
+!define LIGHTBLUE
+!includeurl https://raw.githubusercontent.com/Drakemor/RedDress-PlantUML/master/style.puml
+
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title SIP Call Transfer Flow (REFER Method)
+
+participant "Alice\n(Transferor)" as Alice
+participant "Bob\n(Transferee)" as Bob
+participant "Charlie\n(Transfer Target)" as Charlie
+
+note over Alice, Bob: Established Call Between Alice and Bob
+
+Alice -> Bob: INVITE
+note right of Alice
+  Initial call setup
+  SDP with media capabilities
+endnote
+
+Bob --> Alice: 200 OK
+note right of Bob
+  Call accepted
+  SDP with media capabilities
+endnote
+
+Alice -> Bob: ACK
+
+note over Alice, Bob #LightBlue: Active Call Session (RTP Media)
+
+note over Alice, Bob, Charlie: Call Transfer Initiation
+
+Alice -> Bob: REFER sip:bob@domain.com
+note right of Alice
+  REFER sip:bob@domain.com SIP/2.0
+  Via: SIP/2.0/UDP client.atlanta.com:5060;branch=z9hG4bK74bf9
+  Max-Forwards: 70
+  From: Alice <sip:alice@atlanta.com>;tag=9fxced76sl
+  To: Bob <sip:bob@domain.com>;tag=8321234356
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 101 REFER
+  Contact: <sip:alice@client.atlanta.com>
+  Refer-To: <sip:charlie@domain.com>
+  Referred-By: <sip:alice@atlanta.com>
+  Content-Length: 0
+endnote
+
+Bob --> Alice: 202 Accepted
+note right of Bob
+  Transfer request accepted
+  Will attempt to contact Charlie
+endnote
+
+note over Alice, Bob: NOTIFY Dialog (Subscription)
+
+Bob -> Alice: NOTIFY sip:alice@client.atlanta.com
+note right of Bob
+  NOTIFY sip:alice@client.atlanta.com SIP/2.0
+  Via: SIP/2.0/UDP client.biloxi.com:5060;branch=z9hG4bK74bf9
+  Max-Forwards: 70
+  From: Bob <sip:bob@domain.com>;tag=8321234356
+  To: Alice <sip:alice@atlanta.com>;tag=9fxced76sl
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 1 NOTIFY
+  Contact: <sip:bob@client.biloxi.com>
+  Event: refer
+  Subscription-State: active;expires=60
+  Content-Type: message/sipfrag
+  Content-Length: 20
+  
+  SIP/2.0 100 Trying
+endnote
+
+Alice --> Bob: 200 OK
+note right of Alice
+  Acknowledges NOTIFY
+endnote
+
+note over Bob, Charlie: New Call Establishment
+
+Bob -> Charlie: INVITE sip:charlie@domain.com
+note right of Bob
+  INVITE sip:charlie@domain.com SIP/2.0
+  Via: SIP/2.0/UDP client.biloxi.com:5060;branch=z9hG4bK74bf9
+  Max-Forwards: 70
+  From: Bob <sip:bob@domain.com>;tag=314159
+  To: Charlie <sip:charlie@domain.com>
+  Call-ID: 4992881134@biloxi.com
+  CSeq: 1 INVITE
+  Contact: <sip:bob@client.biloxi.com>
+  Referred-By: <sip:alice@atlanta.com>
+  Content-Type: application/sdp
+  Content-Length: 142
+endnote
+
+Charlie --> Bob: 180 Ringing
+
+Charlie --> Bob: 200 OK
+note right of Charlie
+  Charlie accepts the call
+endnote
+
+Bob -> Charlie: ACK
+
+note over Bob, Charlie #LightBlue: New Call Session Established (RTP Media)
+
+note over Alice, Bob: Transfer Completion Notification
+
+Bob -> Alice: NOTIFY sip:alice@client.atlanta.com
+note right of Bob
+  NOTIFY sip:alice@client.atlanta.com SIP/2.0
+  Via: SIP/2.0/UDP client.biloxi.com:5060;branch=z9hG4bK74bf9
+  Max-Forwards: 70
+  From: Bob <sip:bob@domain.com>;tag=8321234356
+  To: Alice <sip:alice@atlanta.com>;tag=9fxced76sl
+  Call-ID: 3848276298220188511@atlanta.com
+  CSeq: 2 NOTIFY
+  Contact: <sip:bob@client.biloxi.com>
+  Event: refer
+  Subscription-State: terminated;reason=noresource
+  Content-Type: message/sipfrag
+  Content-Length: 16
+  
+  SIP/2.0 200 OK
+endnote
+
+Alice --> Bob: 200 OK
+note right of Alice
+  Acknowledges final NOTIFY
+  Transfer is complete
+endnote
+
+note over Alice, Bob: Original Call Termination
+
+Alice -> Bob: BYE sip:bob@domain.com
+note right of Alice
+  Terminates original call
+endnote
+
+Bob --> Alice: 200 OK
+note right of Bob
+  Original call terminated
+endnote
+
+note over Bob, Charlie #LightBlue: Call Successfully Transferred\nBob and Charlie Continue Conversation
+
+@enduml

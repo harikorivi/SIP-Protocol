@@ -1,0 +1,152 @@
+@startuml
+!define LIGHTBLUE
+!includeurl https://raw.githubusercontent.com/Drakemor/RedDress-PlantUML/master/style.puml
+
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title SIPp Test Scenario Flow
+
+participant "SIPp\n(Test Tool)" as SIPp
+participant "System Under Test\n(SIP Server/Proxy)" as SUT
+
+note over SIPp, SUT: Test Initialization
+
+note right of SIPp
+  SIPp started with XML scenario:
+  sipp -sf uac_scenario.xml 192.168.1.10:5060 
+  -s 1000 -l 10 -m 100 -r 10 -trace_msg
+endnote
+
+note over SIPp, SUT: Test Execution
+
+SIPp -> SUT: INVITE sip:1000@192.168.1.10:5060
+note right of SIPp
+  INVITE sip:1000@192.168.1.10:5060 SIP/2.0
+  Via: SIP/2.0/UDP 192.168.1.5:5060;branch=z9hG4bK-1-0
+  From: sipp <sip:sipp@192.168.1.5>;tag=1
+  To: sut <sip:1000@192.168.1.10:5060>
+  Call-ID: 1-1@192.168.1.5
+  CSeq: 1 INVITE
+  Contact: sip:sipp@192.168.1.5:5060
+  Max-Forwards: 70
+  Content-Type: application/sdp
+  Content-Length: [len]
+  
+  v=0
+  o=user1 53655765 2353687637 IN IP4 192.168.1.5
+  s=-
+  c=IN IP4 192.168.1.5
+  t=0 0
+  m=audio 6000 RTP/AVP 0
+  a=rtpmap:0 PCMU/8000
+endnote
+
+SUT --> SIPp: 100 Trying
+note right of SUT
+  SIP/2.0 100 Trying
+  Via: SIP/2.0/UDP 192.168.1.5:5060;branch=z9hG4bK-1-0
+  From: sipp <sip:sipp@192.168.1.5>;tag=1
+  To: sut <sip:1000@192.168.1.10:5060>
+  Call-ID: 1-1@192.168.1.5
+  CSeq: 1 INVITE
+  Content-Length: 0
+endnote
+
+SUT --> SIPp: 180 Ringing
+note right of SUT
+  SIP/2.0 180 Ringing
+  Via: SIP/2.0/UDP 192.168.1.5:5060;branch=z9hG4bK-1-0
+  From: sipp <sip:sipp@192.168.1.5>;tag=1
+  To: sut <sip:1000@192.168.1.10:5060>;tag=as58f4a123
+  Call-ID: 1-1@192.168.1.5
+  CSeq: 1 INVITE
+  Contact: <sip:1000@192.168.1.10:5060>
+  Content-Length: 0
+endnote
+
+SUT --> SIPp: 200 OK
+note right of SUT
+  SIP/2.0 200 OK
+  Via: SIP/2.0/UDP 192.168.1.5:5060;branch=z9hG4bK-1-0
+  From: sipp <sip:sipp@192.168.1.5>;tag=1
+  To: sut <sip:1000@192.168.1.10:5060>;tag=as58f4a123
+  Call-ID: 1-1@192.168.1.5
+  CSeq: 1 INVITE
+  Contact: <sip:1000@192.168.1.10:5060>
+  Content-Type: application/sdp
+  Content-Length: 170
+  
+  v=0
+  o=user1 53655765 2353687637 IN IP4 192.168.1.10
+  s=-
+  c=IN IP4 192.168.1.10
+  t=0 0
+  m=audio 6010 RTP/AVP 0
+  a=rtpmap:0 PCMU/8000
+endnote
+
+SIPp -> SUT: ACK sip:1000@192.168.1.10:5060
+note right of SIPp
+  ACK sip:1000@192.168.1.10:5060 SIP/2.0
+  Via: SIP/2.0/UDP 192.168.1.5:5060;branch=z9hG4bK-1-1
+  From: sipp <sip:sipp@192.168.1.5>;tag=1
+  To: sut <sip:1000@192.168.1.10:5060>;tag=as58f4a123
+  Call-ID: 1-1@192.168.1.5
+  CSeq: 1 ACK
+  Contact: sip:sipp@192.168.1.5:5060
+  Max-Forwards: 70
+  Content-Length: 0
+endnote
+
+note over SIPp, SUT #LightBlue: RTP Media Exchange (Optional)\nSIPp can play media from PCAP files or echo RTP
+
+note right of SIPp
+  SIPp pauses for configured duration
+  Collecting statistics during the test
+endnote
+
+SIPp -> SUT: BYE sip:1000@192.168.1.10:5060
+note right of SIPp
+  BYE sip:1000@192.168.1.10:5060 SIP/2.0
+  Via: SIP/2.0/UDP 192.168.1.5:5060;branch=z9hG4bK-1-2
+  From: sipp <sip:sipp@192.168.1.5>;tag=1
+  To: sut <sip:1000@192.168.1.10:5060>;tag=as58f4a123
+  Call-ID: 1-1@192.168.1.5
+  CSeq: 2 BYE
+  Contact: sip:sipp@192.168.1.5:5060
+  Max-Forwards: 70
+  Content-Length: 0
+endnote
+
+SUT --> SIPp: 200 OK
+note right of SUT
+  SIP/2.0 200 OK
+  Via: SIP/2.0/UDP 192.168.1.5:5060;branch=z9hG4bK-1-2
+  From: sipp <sip:sipp@192.168.1.5>;tag=1
+  To: sut <sip:1000@192.168.1.10:5060>;tag=as58f4a123
+  Call-ID: 1-1@192.168.1.5
+  CSeq: 2 BYE
+  Content-Length: 0
+endnote
+
+note over SIPp, SUT: Test Completion
+
+note right of SIPp
+  SIPp generates statistics:
+  - Call rate
+  - Response times
+  - Success/failure rates
+  - Retransmissions
+  
+  Example output:
+  ------------------------------ Statistics --------------------------------
+  Successful call completion.......: 100    100.00%
+  Call establishment failures......: 0      0.00%
+  Call completed with retransmissions: 0      0.00%
+  ------------------------------ Timers ----------------------------------
+  Response Time (ms):
+    Min: 5.00 / Avg: 12.35 / Max: 35.40 / StdDev: 4.25
+endnote
+
+@enduml

@@ -1,0 +1,20 @@
+digraph "SIP Registration Flow" {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor=lightblue];
+  edge [fontsize=10];
+  
+  // Define nodes
+  UA [label="User Agent"];
+  Registrar [label="SIP Registrar"];
+  
+  // Define the registration flow
+  UA -> Registrar [label="1. REGISTER sip:domain.com\nContact: <sip:user@192.168.1.2>"];
+  Registrar -> UA [label="2. 401 Unauthorized\nWWW-Authenticate: Digest..."];
+  UA -> Registrar [label="3. REGISTER sip:domain.com\nAuthorization: Digest..."];
+  Registrar -> UA [label="4. 200 OK"];
+  
+  // Add a title
+  label = "SIP Registration Flow";
+  labelloc = "t";
+  fontsize = 20;
+}
